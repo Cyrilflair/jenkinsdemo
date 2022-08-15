@@ -1,0 +1,35 @@
+def tomcatServerUrl = "http://20.114.161.119:8080/"
+pipeline {
+  agent {
+   node {
+      label 'master'
+    }
+  }
+  stages {
+    //Use this code for inline pipeline script option
+    /* stage('Code checkout') {
+      steps {
+        //download code from github
+        git 'https://github.com/sachinchandi55/jenkinsdemo.git'
+      }
+
+    }*/
+    stage('Build') {
+      steps {
+        // Run the maven build
+        sh '"mvn" -Dmaven.test.failure.ignore clean install'
+      }
+
+    }
+    stage('Deploy') {
+      steps {
+        //deploy war on tomcat server
+        deploy adapters: [tomcat8(url: "${tomcatServerUrl}",
+            credentialsId: 'tomcatuser')],
+          war: 'target/*.war',
+          contextPath: 'pipeline-app'
+
+      }
+    }
+  }
+}
